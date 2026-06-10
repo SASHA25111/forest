@@ -34,7 +34,7 @@
   var catImgLoaded = false;
   catImg.onload  = function(){ catImgLoaded = true; };
   catImg.onerror = function(){ catImgLoaded = false; };
-  catImg.src = 'https://cdn.jsdelivr.net/gh/SASHA25111/forest@main/source/cat-face.svg';
+  catImg.src = 'https://cdn.jsdelivr.net/gh/SASHA25111/forest@main/source/geosurv/cat-face.svg';
 
   // ── Определения врагов ──
   var ENEMY_TYPES = {
