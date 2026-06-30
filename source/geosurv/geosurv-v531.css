@@ -1,0 +1,856 @@
+.t-rec:has(#forest-geosurv){
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+.t-rec:has(#forest-geosurv) .t-container,
+.t-rec:has(#forest-geosurv) .t123,
+.t-rec:has(#forest-geosurv) .t123__wrap{
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+#forest-geosurv{
+  background: #060606;
+  color: #fff;
+  padding: 80px 24px 90px;
+  font-family: 'Montserrat', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+#forest-geosurv *,
+#forest-geosurv *::before,
+#forest-geosurv *::after{ box-sizing: border-box; }
+
+.fgs__inner{
+  max-width: 920px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Заголовок ── */
+.fgs__title{
+  margin: 0 0 8px;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: clamp(26px, 3.6vw, 42px);
+  font-weight: 800;
+  letter-spacing: -.005em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.fgs__title span{ color: #ffc200; }
+.fgs__sub{
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: rgba(255,255,255,.55);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ── Игровое поле ── */
+.fgs__game{
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  max-height: 70vh;
+  background: #0a0a0a;
+  border: 1px solid rgba(255,194,0,.3);
+  border-radius: 16px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* v3.1: стили чтобы пережить move в body при фейк-фуллскрине */
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+}
+.fgs__game *,
+.fgs__game *::before,
+.fgs__game *::after{ box-sizing: border-box; }
+.fgs__canvas{
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;     /* отключаем double-tap zoom и pinch */
+  -ms-touch-action: none;
+  cursor: default;        /* v5.6: ручного прицеливания нет, обычный курсор */
+}
+
+/* ── Верхний HUD ── */
+.fgs__hud{
+  position: absolute;
+  top: 14px; left: 14px; right: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 2;
+}
+.fgs__hud-left{ display: flex; flex-direction: column; gap: 8px; flex: 1; max-width: 280px; }
+.fgs__hud-right{ display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+
+.fgs__bar-row{ display: flex; flex-direction: column; gap: 2px; }
+.fgs__bar-label{
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,.7);
+}
+.fgs__bar-name{ color: rgba(255,255,255,.65); }
+.fgs__bar-val{ color: #fff; font-weight: 800; }
+.fgs__bar-val--xp{ color: #ffc200; }
+
+.fgs__hp{
+  height: 10px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.fgs__hp-fill{
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ff5555, #ff8a55);
+  transition: width .2s ease;
+}
+.fgs__xp{
+  height: 6px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.fgs__xp-fill{
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #ffc200, #fff076);
+  transition: width .2s ease, background .3s ease;
+}
+.fgs__xp-fill.is-maxed{
+  background: linear-gradient(90deg, #fff, #e0e0e0) !important;
+}
+
+.fgs__stat{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+.fgs__stat-label{
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+  font-weight: 700;
+}
+.fgs__stat-value{
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.fgs__stat--score .fgs__stat-value{ color: #ffc200; }
+
+/* Активные баффы — подпись под XP с таймером */
+.fgs__buff-row{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+.fgs__buff-row:empty{ display: none; }
+.fgs__buff-item{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fgs__buff-item-text{
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  line-height: 1.25;
+  color: rgba(255,255,255,.85);
+  text-shadow: 0 1px 2px rgba(0,0,0,.75);
+}
+.fgs__buff-item-text b{
+  color: #ffc200;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.fgs__buff-item-bar{
+  height: 3px;
+  background: rgba(0,0,0,.55);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.fgs__buff-item-fill{
+  height: 100%;
+  background: #ffc200;
+  width: 100%;
+}
+
+/* ── HP-полоска мега-босса ── */
+.fgs__megabar{
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  max-width: 60%;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 3;
+  pointer-events: none;
+}
+/* В фуллскрине поднимаем над safe-area-bottom (home-indicator) */
+.fgs__game.is-fakefullscreen .fgs__megabar,
+.fgs__game.is-native-fs .fgs__megabar{
+  bottom: calc(22px + env(safe-area-inset-bottom)) !important;
+}
+.fgs__megabar.is-visible{ display: flex; }
+/* Шапка megabar: название босса (слева) + HP (справа) */
+.fgs__megabar-head{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fgs__megabar-label{
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #c994ff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  flex: 1;
+}
+.fgs__megabar-hp{
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  white-space: nowrap;
+}
+.fgs__megabar.is-low .fgs__megabar-hp{
+  color: #ff7070;
+}
+.fgs__megabar-bar{
+  height: 8px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(200, 140, 255, .45);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.fgs__megabar-fill{
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #c994ff, #7b3fbf);
+  transition: width .2s ease;
+}
+.fgs__megabar.is-low .fgs__megabar-fill{
+  background: linear-gradient(90deg, #ff7070, #c0303f);
+  animation: fgsMegaPulse .55s ease-in-out infinite;
+}
+@keyframes fgsMegaPulse{
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+
+/* ── Анонс при появлении мега-босса ── */
+.fgs__mega-announce{
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(.6);
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(36px, 7vw, 72px);
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #ff5050;
+  text-shadow: 0 0 32px rgba(255, 80, 80, .65),
+               0 4px 12px rgba(0,0,0,.8);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.fgs__mega-announce.is-visible{
+  animation: fgsMegaAnnounce 2.5s ease-out forwards;
+}
+@keyframes fgsMegaAnnounce{
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25); }
+}
+
+/* ── Виртуальный джойстик (мобила) ── */
+.fgs__joystick{
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  display: none;
+  z-index: 3;
+  touch-action: none;
+}
+.fgs__joystick-stick{
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 48px; height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  background: rgba(255,194,0,.65);
+  border: 1px solid #ffc200;
+  pointer-events: none;
+}
+@media (hover: none) and (pointer: coarse){
+  .fgs__joystick{ display: block; }
+}
+
+/* ── Стартовый экран ── */
+.fgs__overlay{
+  position: absolute;
+  inset: 0;
+  cursor: default;     /* v5.6: курсор виден на стартовом экране */
+  background: rgba(6,6,6,.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  z-index: 5;
+}
+.fgs__overlay-title{
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+.fgs__overlay-text{
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.55;
+  max-width: 420px;
+  margin: 0 0 22px;
+}
+
+.fgs__btn{
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-radius: 100px;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #060606;
+  background: #ffc200;
+  border: 1px solid #ffc200;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.fgs__btn:hover{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,194,0,.3); }
+.fgs__btn:active{ transform: translateY(0); }
+.fgs__btn--ghost{
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  border-color: rgba(255,255,255,.2);
+}
+
+/* ── Level-up модалка ── */
+.fgs__levelup{
+  position: absolute;
+  inset: 0;
+  cursor: default;     /* v5.6: курсор виден в фуллскрине на ПК */
+  background: rgba(6,6,6,.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 18px;
+  z-index: 6;
+}
+.fgs__levelup.is-visible{ display: flex; }
+.fgs__levelup-title{
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 800;
+  letter-spacing: -.005em;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  color: #ffc200;
+}
+.fgs__levelup-sub{
+  font-size: 12px;
+  color: rgba(255,255,255,.55);
+  margin: 0 0 18px;
+}
+.fgs__upgrades{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+}
+@media (max-width: 600px){
+  .fgs__upgrades{ grid-template-columns: 1fr; }
+}
+.fgs__upgrade{
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,194,0,.25);
+  border-radius: 12px;
+  padding: 16px 14px;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  text-align: left;
+  font-family: 'Montserrat', sans-serif !important;
+  color: #fff;
+}
+
+/* 1-секундный anti-misclick лок при открытии level-up */
+.fgs__upgrades.is-locked .fgs__upgrade{
+  pointer-events: none;
+  opacity: 0.55;
+  filter: grayscale(0.4);
+}
+.fgs__lock-bar{
+  width: 200px;
+  max-width: 70%;
+  height: 3px;
+  background: rgba(255,255,255,.12);
+  border-radius: 2px;
+  margin: 0 auto 14px;
+  overflow: hidden;
+}
+.fgs__lock-fill{
+  height: 100%;
+  width: 0;
+  background: #ffc200;
+}
+.fgs__lock-fill.is-running{
+  width: 100%;
+  transition: width 1s linear;
+}
+.fgs__upgrade:hover{
+  background: rgba(255,194,0,.1);
+  border-color: rgba(255,194,0,.6);
+  transform: translateY(-2px);
+}
+.fgs__up-name{ font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+.fgs__up-name span{ color: #ffc200; }
+.fgs__up-desc{ font-size: 12px; color: rgba(255,255,255,.62); line-height: 1.4; }
+.fgs__up-lvl{
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,194,0,.85);
+}
+
+/* ── Game over ── */
+.fgs__gameover{
+  position: absolute;
+  inset: 0;
+  cursor: default;     /* v5.6: курсор виден */
+  background: rgba(6,6,6,.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  z-index: 7;
+}
+.fgs__gameover.is-visible{ display: flex; }
+.fgs__go-title{
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  letter-spacing: -.005em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.fgs__go-title span{ color: #ffc200; }
+.fgs__go-stats{
+  font-size: 14px;
+  color: rgba(255,255,255,.75);
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+.fgs__go-stats b{ color: #fff; font-weight: 800; }
+.fgs__go-stats .hi{ color: #ffc200; font-weight: 800; }
+
+.fgs__go-form{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 14px;
+}
+.fgs__go-input{
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  outline: none;
+  text-align: center;
+}
+.fgs__go-input:focus{ border-color: #ffc200; }
+.fgs__go-actions{ display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.fgs__go-status{
+  font-size: 11px;
+  color: rgba(255,255,255,.5);
+  margin-top: 10px;
+  min-height: 14px;
+}
+.fgs__go-status.is-success{ color: #7eea7e; }
+.fgs__go-status.is-error{ color: #ff7777; }
+
+/* ── Кнопки контролов (Fullscreen + Pause) ── */
+.fgs__controls{
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.fgs__ctrl-btn{
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .15);
+  color: rgba(255,255,255,.92);
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .25s ease, border-color .25s ease, color .25s ease;
+}
+.fgs__ctrl-btn:hover{
+  background: rgba(255, 194, 0, .12);
+  border-color: rgba(255, 194, 0, .55);
+  color: #ffc200;
+}
+.fgs__ctrl-btn svg{ width: 14px; height: 14px; flex-shrink: 0; }
+.fgs__ctrl-btn[disabled]{ opacity: .5; cursor: not-allowed; }
+
+/* Парные иконки (одна показана, другая скрыта в зависимости от состояния) */
+.fgs__icon--off{ display: none; }
+.fgs__ctrl-btn.is-active .fgs__icon--on{ display: none; }
+.fgs__ctrl-btn.is-active .fgs__icon--off{ display: inline-block; }
+
+/* ── Псевдо-фуллскрин (фолбэк для iOS) ── */
+.fgs__game.is-fakefullscreen{
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  width: 100dvw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 2147483647 !important;
+  max-height: none !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  aspect-ratio: auto !important;
+}
+/* Safe-area для iPhone с «чёлкой»: HUD/джойстик отступают от краёв */
+.fgs__game.is-fakefullscreen .fgs__hud{
+  top: max(14px, env(safe-area-inset-top)) !important;
+  left: max(14px, env(safe-area-inset-left)) !important;
+  right: max(14px, env(safe-area-inset-right)) !important;
+}
+.fgs__game.is-fakefullscreen .fgs__joystick,
+.fgs__game.is-native-fs .fgs__joystick{
+  /* В фуллскрине поднимаем джойстик повыше и правее,
+     чтобы большой палец комфортно дотягивался без хвата
+     за самый угол телефона. */
+  bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+  left: calc(44px + env(safe-area-inset-left)) !important;
+}
+.fgs__game.is-native-fs .fgs__hud{
+  top: max(14px, env(safe-area-inset-top)) !important;
+  left: max(14px, env(safe-area-inset-left)) !important;
+  right: max(14px, env(safe-area-inset-right)) !important;
+}
+
+/* ── Круглая кнопка «свернуть» в правом нижнем углу при фуллскрине ── */
+.fgs__exit-fs{
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.65);
+  border: 1px solid rgba(255,194,0,.45);
+  color: #ffc200;
+  cursor: pointer;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background .2s ease, transform .2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.fgs__exit-fs:hover{ background: rgba(255,194,0,.95); color: #060606; transform: scale(1.05); }
+.fgs__exit-fs svg{ width: 18px; height: 18px; }
+.fgs__game.is-fakefullscreen .fgs__exit-fs,
+.fgs__game.is-native-fs .fgs__exit-fs{
+  display: flex;
+}
+.fgs__game.is-fakefullscreen .fgs__exit-fs,
+.fgs__game.is-native-fs .fgs__exit-fs{
+  bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  right: max(16px, env(safe-area-inset-right)) !important;
+}
+
+/* ── Pause overlay поверх канваса ── */
+.fgs__pause-overlay{
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 4;
+  pointer-events: none;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: rgba(255, 194, 0, .85);
+  text-shadow: 0 0 24px rgba(255, 194, 0, .35);
+}
+.fgs__pause-overlay.is-visible{ display: flex; }
+
+/* ── Лидерборд ── */
+.fgs__lb{
+  margin-top: 28px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.fgs__lb-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fgs__lb-title{
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.9);
+  margin: 0;
+}
+.fgs__lb-refresh{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.85);
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+}
+.fgs__lb-device{
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: middle;
+  opacity: .9;
+}
+.fgs__lb-list{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+@media (max-width: 440px){
+  .fgs__lb-list li{ font-size: 11px; padding: 6px 8px; gap: 6px; }
+}
+.fgs__lb-list li{
+  display: grid;
+  grid-template-columns: 24px 1fr auto 48px 32px 22px;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,.03);
+  border-radius: 8px;
+  font-size: 13px;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.fgs__lb-list li.is-self{ background: rgba(255,194,0,.12); }
+.fgs__lb-rank{ color: rgba(255,255,255,.45); font-weight: 700; }
+.fgs__lb-name{ color: #fff; font-weight: 600; }
+.fgs__lb-score{ color: #ffc200; font-weight: 800; }
+.fgs__lb-empty{ padding: 12px; color: rgba(255,255,255,.45); font-size: 12px; text-align: center; }
+
+@media (max-width: 720px){
+  #forest-geosurv{ padding: 60px 14px 70px; }
+  .fgs__game{ aspect-ratio: 3/4; max-height: 78vh; }
+}
+/* Панель текущих характеристик игрока в level-up модалке */
+.fgs__player-stats{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+}
+.fgs__stat-chip{
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,.025);
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.fgs__stat-chip-name{
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  line-height: 1.2;
+}
+.fgs__stat-chip-value{
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+.fgs__stat-chip.is-maxed .fgs__stat-chip-value{ color: #ffc200; }
+.fgs__stat-chip.is-zero .fgs__stat-chip-value{ color: rgba(255,255,255,.4); }
+
+@media (max-width: 600px){
+  .fgs__player-stats{ grid-template-columns: repeat(3, 1fr); }
+  .fgs__stat-chip-value{ font-size: 11.5px; }
+}
+@media (max-width: 420px){
+  .fgs__player-stats{ grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 10px; }
+}
+
+
+/* v5.27 — бэдж уровня слева от XP-шкалы */
+.fgs__xp-row{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.fgs__xp-row .fgs__xp{ flex: 1; }
+.fgs__level-badge{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #ffc200;
+    color: #060606;
+    font-weight: 800;
+    font-size: 12px;
+    line-height: 1;
+    font-family: 'Montserrat', sans-serif;
+    flex-shrink: 0;
+}
+
+
+/* v5.30 — шапка таблицы лидерборда (time / lvl) */
+.fgs__lb-cols{
+    display: grid;
+    grid-template-columns: 24px 1fr auto 48px 32px 22px;
+    gap: 10px;
+    padding: 6px 12px 2px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+}
+.fgs__lb-col-rank, .fgs__lb-col-name{ text-align: left; }
+.fgs__lb-col-score, .fgs__lb-col-time, .fgs__lb-col-lvl{ text-align: right; }
+
+/* v5.30 — колонки time / lvl в строке списка */
+.fgs__lb-time{
+    color: #ffc200;
+    font-weight: 800;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.fgs__lb-lvl{
+    color: rgba(255,255,255,.75);
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
